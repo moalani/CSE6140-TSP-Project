@@ -1,5 +1,6 @@
-import numpy as np
+import datetime as dt
 import random
+import numpy as np
 
 
 def distance(node_a: list, node_b: list) -> float:
@@ -17,10 +18,14 @@ def tour_cost(path: list) -> float:
 
 def load_data(file_name):
     with open(file_name, 'r') as input_file:
+        lines_read = input_file.readlines()
         # Read all the data from the 5th index until before the last index
         # Parse the line into index numbers and coordinates
         # Convert coordinates to float
-        data = [tuple(map(float, text.strip().split(' ')[1:3])) for text in input_file.readlines()[5:-1]]
+    data = []
+    for text in lines_read:
+        if len(text) > 0 and text[0].isdigit():
+            data.append(tuple(map(float, text.strip().split(' ')[1:3])))
     return data
 
 
@@ -44,17 +49,16 @@ def breed_to_right(left, right_input):
     return right
 
 
-def optimize_tsp(locations, time, seed):
+def optimize_tsp(locations, timer, seed):
     current_low = float('inf')
-    time_spent = 0
     epochs = 0
 
     population_size = 400
     population = generate_new_population(locations, population_size)
     costs = list(map(tour_cost, population))
     ranked_costs, ranked_population = list(zip(*sorted(zip(costs, population), key=lambda x: x[0])))
-
-    while time_spent <= 200 and epochs <= 10000:
+    time_spent = 0
+    while time_spent <= 200 and timer():
         ranked_population = ranked_population[:population_size // 4]
         ranked_population += tuple(generate_new_population(locations, 3 * population_size // 4))
         best_pairings = list(zip(random.choices(ranked_population[:5], k=population_size // 8),
@@ -92,8 +96,23 @@ def generate_new_population(locations, population_size):
     return population
 
 
-def load_and_solve(seed: int, file_path: str = 'DATA/Atlanta.tsp', time: int = 10) -> tuple:
+def load_and_solve(seed: int, file_path: str = 'DATA/Atlanta.tsp', timer=lambda: True) -> object:
     tsp_data = load_data(file_path)
     location_index_map = {location: i for i, location in enumerate(tsp_data)}
-    score, path = optimize_tsp(tsp_data, time=time, seed=seed)
+    score, path = optimize_tsp(tsp_data, timer=timer, seed=seed)
     return score, [location_index_map[location] for location in path]
+
+
+if __name__ == '__main__':
+    start_time = dt.datetime.now()
+
+
+    def timer():
+        return (dt.datetime.now() - start_time).total_seconds() < args.time
+
+
+    score, solution = load_and_solve(
+        file_path='''/Users/justin/SynologyDrive/Learning Materials/School/Grad School/CSE 6140 Algorithms/Project/CSE6140-TSP-Project/DATA/Berlin.tsp''',
+        timer=timer,
+        seed=0)
+    print(score, solution)
