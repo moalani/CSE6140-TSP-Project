@@ -4,6 +4,7 @@ from typing import Any, Callable, Union
 import genetic_algorithm
 import numpy as np
 import datetime as dt
+import random
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run TSP on a given location file.')
@@ -25,6 +26,8 @@ if __name__ == '__main__':
     print(
         f'''Running algorithm {args.alg} on file {args.inst} with a time limit of {args.time} seconds and a random seed of {args.seed}''')
 
+    np.random.seed(args.seed)
+    random.seed(np.random.randint(999999))
     start_time = dt.datetime.now()
 
 
