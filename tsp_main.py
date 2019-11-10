@@ -5,6 +5,52 @@ import genetic_algorithm
 import numpy as np
 import datetime as dt
 import random
+import os
+
+
+def load_data(file_name):
+    with open(file_name, 'r') as input_file:
+        lines_read = input_file.readlines()
+        # Read all the data from the 5th index until before the last index
+        # Parse the line into index numbers and coordinates
+        # Convert coordinates to float
+    name = ''
+    data = []
+    for text in lines_read:
+        if len(text) > 0 and text[0].isdigit():
+            data.append(tuple(map(float, text.strip().split(' ')[1:3])))
+        elif 'NAME: ' in text:
+            name = text[6:-1]
+    return name, data
+
+
+class Tracer:
+    def __init__(self, method, instance, seed, cutoff):
+        self.cutoff = cutoff
+        self.seed = seed
+        self.instance = instance
+        self.method = method
+        self._event_log = []
+        self._current_best = float('inf')
+
+    def next_result(self, value):
+        if value < self._current_best:
+            self._event_log.append((dt.datetime.now(), value))
+
+
+    def write_to(self, file_path):
+        first_time = self._event_log[0][0]
+        full_path = os.path.join(file_path, f'{self.instance}_{self.method}_{self.cutoff}_{self.seed}.trace')
+        with open(full_path, 'w') as f:
+            for time, value in self._event_log:
+                seconds_elapsed = round((time - first_time).total_seconds(), 2)
+                f.write(f'{seconds_elapsed}, {value}\n')
+
+def save_solution_file(cost_value, solution, method, instance, seed, cutoff):
+    with open(f'{instance}_{method}_{cutoff}_{seed}.sol', 'w') as solution_file:
+        solution_file.write(str(cost_value) + '\n')
+        solution_file.write(str(solution)[1:-1] + '\n')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run TSP on a given location file.')
@@ -29,20 +75,21 @@ if __name__ == '__main__':
     np.random.seed(args.seed)
     random.seed(np.random.randint(999999))
     start_time = dt.datetime.now()
-
+    instance_name, city_data = load_data(args.inst)
+    tracer = Tracer(method=args.alg, instance=instance_name, seed=args.seed, cutoff=args.time)
 
     def timer():
         return (dt.datetime.now() - start_time).total_seconds() < args.time
 
 
     if args.alg == 'LS1':
-        score, solution = genetic_algorithm.load_and_solve(file_path=args.inst,
-                                                           timer=timer,
-                                                           seed=args.seed)
-        print(score)
-        print(solution)
+        score, solution = genetic_algorithm.solve(data=city_data,
+                                                  timer=timer,
+                                                  tracer=tracer)
 
+    save_solution_file(score, solution, method=args.alg, instance=instance_name, seed=args.seed, cutoff=args.time)
+    tracer.write_to('./')
 
 # Roanoke Best So Far
-# 3037024.2378277727
-# [175, 143, 178, 82, 134, 161, 43, 219, 115, 168, 54, 88, 160, 183, 195, 191, 20, 3, 49, 116, 165, 129, 5, 196, 176, 197, 109, 67, 210, 137, 12, 119, 107, 26, 39, 61, 182, 117, 51, 200, 58, 113, 148, 171, 136, 7, 48, 101, 106, 74, 204, 31, 0, 6, 164, 199, 121, 163, 79, 187, 123, 69, 158, 73, 8, 184, 93, 36, 27, 80, 33, 132, 86, 111, 154, 209, 45, 226, 135, 30, 190, 198, 131, 229, 211, 128, 11, 185, 108, 169, 32, 227, 216, 214, 220, 19, 59, 2, 172, 62, 228, 34, 90, 202, 63, 18, 153, 225, 41, 207, 42, 139, 156, 71, 206, 68, 64, 78, 223, 124, 224, 4, 155, 144, 133, 84, 159, 9, 194, 192, 47, 72, 28, 60, 75, 151, 140, 174, 201, 180, 96, 222, 188, 110, 193, 208, 138, 83, 127, 189, 23, 177, 56, 203, 213, 97, 126, 77, 95, 100, 150, 10, 50, 181, 1, 24, 13, 146, 38, 162, 70, 66, 35, 118, 112, 46, 81, 114, 166, 22, 167, 14, 15, 130, 205, 173, 102, 120, 53, 85, 141, 149, 170, 87, 145, 186, 217, 212, 92, 122, 125, 147, 40, 98, 215, 17, 52, 99, 104, 65, 157, 142, 16, 25, 21, 29, 94, 103, 37, 152, 89, 179, 218, 221, 76, 105, 91, 55, 57, 44]
+#1313450.1104071145
+#[159, 151, 192, 9, 194, 83, 56, 118, 199, 190, 177, 156, 48, 117, 6, 228, 62, 31, 162, 82, 106, 160, 129, 101, 39, 168, 80, 77, 49, 93, 34, 150, 54, 111, 154, 132, 86, 214, 100, 26, 61, 27, 33, 88, 182, 209, 19, 146, 73, 134, 206, 38, 139, 66, 42, 198, 30, 126, 70, 71, 161, 35, 0, 116, 4, 219, 180, 10, 213, 46, 224, 16, 196, 124, 153, 43, 155, 144, 90, 95, 21, 178, 165, 204, 36, 115, 74, 191, 183, 107, 210, 5, 223, 102, 186, 103, 229, 203, 220, 1, 81, 120, 76, 179, 23, 140, 127, 105, 221, 40, 65, 189, 98, 52, 215, 53, 99, 201, 91, 174, 17, 55, 104, 218, 157, 148, 114, 32, 128, 145, 87, 108, 216, 20, 3, 227, 152, 169, 141, 149, 185, 170, 89, 11, 37, 202, 211, 44, 171, 51, 138, 142, 13, 163, 197, 24, 112, 41, 125, 121, 176, 225, 97, 2, 137, 50, 68, 22, 158, 14, 119, 96, 207, 184, 15, 188, 136, 63, 47, 18, 29, 45, 110, 226, 222, 67, 8, 195, 25, 143, 59, 200, 173, 164, 7, 109, 135, 205, 84, 123, 130, 131, 79, 181, 193, 175, 12, 133, 64, 78, 75, 28, 166, 94, 58, 212, 92, 57, 167, 172, 122, 187, 60, 147, 113, 85, 69, 72, 217, 208]

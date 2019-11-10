@@ -16,19 +16,6 @@ def tour_cost(path: list) -> float:
     return cost
 
 
-def load_data(file_name):
-    with open(file_name, 'r') as input_file:
-        lines_read = input_file.readlines()
-        # Read all the data from the 5th index until before the last index
-        # Parse the line into index numbers and coordinates
-        # Convert coordinates to float
-    data = []
-    for text in lines_read:
-        if len(text) > 0 and text[0].isdigit():
-            data.append(tuple(map(float, text.strip().split(' ')[1:3])))
-    return data
-
-
 def breed_to_right(left, right_input):
     right = list(right_input)
     start_index = np.random.randint(len(left))
@@ -49,30 +36,45 @@ def breed_to_right(left, right_input):
     return right
 
 
-def optimize_tsp(locations, timer, seed):
+def mutate(offspring):
+    mutation_occurs = np.random.uniform() < 0.05
+    if mutation_occurs:
+        mutation_count = np.random.randint(1, (len(offspring) // 10) + 1)
+        for _ in range(mutation_count):
+            swap_left = swap_right = 0
+            while swap_left == swap_right:
+                swap_left = np.random.randint(0, len(offspring))
+                swap_right = np.random.randint(0, len(offspring))
+            offspring[swap_left], offspring[swap_right] = offspring[swap_right], offspring[swap_left]
+    return offspring
+
+
+def optimize_tsp(locations, timer, tracer):
     current_low = float('inf')
     epochs = 0
 
-    population_size = 400
+    population_size = 800
     population = generate_new_population(locations, population_size)
     costs = list(map(tour_cost, population))
     ranked_costs, ranked_population = list(zip(*sorted(zip(costs, population), key=lambda x: x[0])))
     time_spent = 0
-    while time_spent <= 200 and timer():
-        ranked_population = ranked_population[:population_size // 4]
+    while time_spent <= 300 and timer():
+        ranked_population = ranked_population[:population_size // 8]
         ranked_population += tuple(generate_new_population(locations, 3 * population_size // 4))
-        best_pairings = list(zip(random.choices(ranked_population[:5], k=population_size // 8),
-                                 random.choices(ranked_population, k=population_size // 8)))
-        random_pairings = list(zip(random.choices(ranked_population[5:], k=population_size // 8),
-                                   random.choices(ranked_population[5:], k=population_size // 8)))
+        best_pairings = list(zip(random.choices(ranked_population[:5], k=population_size // 2),
+                                 random.choices(ranked_population[:100], k=population_size // 2)))
+        random_pairings = list(zip(random.choices(ranked_population[:100], k=population_size // 2),
+                                   random.choices(ranked_population[100:], k=population_size // 2)))
 
         pairings = best_pairings + random_pairings
 
         offspring = []
-        offspring += ranked_population[:5]  # save top N just like they are
+        offspring += ranked_population[:10]  # save top N just like they are
         offspring += list(
             map(lambda x: breed_to_right(x[0], x[1]) if np.random.random() > 0.5 else breed_to_right(x[1], x[0]),
                 pairings))
+
+        offspring = list(map(mutate, offspring))
 
         costs = list(map(tour_cost, list(offspring)))
         rankings = list(zip(*sorted(zip(costs, offspring), key=lambda x: x[0])))
@@ -86,7 +88,9 @@ def optimize_tsp(locations, timer, seed):
         elif ranked_costs[0] == current_low:
             time_spent += 1
         epochs += 1
-        print(f'Lowest cost: {ranked_costs[0]}')
+
+        tracer.next_result(ranked_costs[0])
+        print(f'Lowest cost: {ranked_costs[0]}, Population size: {len(ranked_population)}')
     return ranked_costs[0], ranked_population[0]
 
 
@@ -96,10 +100,10 @@ def generate_new_population(locations, population_size):
     return population
 
 
-def load_and_solve(seed: int, file_path: str = 'DATA/Atlanta.tsp', timer=lambda: True) -> object:
-    tsp_data = load_data(file_path)
+def solve(data: list, timer=lambda: True, tracer=None) -> object:
+    tsp_data = data
     location_index_map = {location: i for i, location in enumerate(tsp_data)}
-    score, path = optimize_tsp(tsp_data, timer=timer, seed=seed)
+    score, path = optimize_tsp(tsp_data, timer=timer, tracer=tracer)
     return score, [location_index_map[location] for location in path]
 
 
@@ -111,7 +115,7 @@ if __name__ == '__main__':
         return (dt.datetime.now() - start_time).total_seconds() < args.time
 
 
-    score, solution = load_and_solve(
+    score, solution = solve(
         file_path='''/Users/justin/SynologyDrive/Learning Materials/School/Grad School/CSE 6140 Algorithms/Project/CSE6140-TSP-Project/DATA/Berlin.tsp''',
         timer=timer,
         seed=0)
