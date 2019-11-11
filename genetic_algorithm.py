@@ -37,9 +37,9 @@ def breed_to_right(left, right_input):
 
 
 def mutate(offspring):
-    mutation_occurs = np.random.uniform() < 0.05
+    mutation_occurs = np.random.uniform() < 0.1
     if mutation_occurs:
-        mutation_count = np.random.randint(1, (len(offspring) // 10) + 1)
+        mutation_count = np.random.randint(1, int(np.sqrt(len(offspring)) + 2))
         for _ in range(mutation_count):
             swap_left = swap_right = 0
             while swap_left == swap_right:
@@ -53,12 +53,12 @@ def optimize_tsp(locations, timer, tracer):
     current_low = float('inf')
     epochs = 0
 
-    population_size = 800
+    population_size = 600
     population = generate_new_population(locations, population_size)
     costs = list(map(tour_cost, population))
     ranked_costs, ranked_population = list(zip(*sorted(zip(costs, population), key=lambda x: x[0])))
     time_spent = 0
-    while time_spent <= 300 and timer():
+    while time_spent <= 100 and timer():
         ranked_population = ranked_population[:population_size // 8]
         ranked_population += tuple(generate_new_population(locations, 3 * population_size // 4))
         best_pairings = list(zip(random.choices(ranked_population[:5], k=population_size // 2),
@@ -90,7 +90,7 @@ def optimize_tsp(locations, timer, tracer):
         epochs += 1
 
         tracer.next_result(ranked_costs[0])
-        print(f'Lowest cost: {ranked_costs[0]}, Population size: {len(ranked_population)}')
+        #print(f'Lowest cost: {ranked_costs[0]}, Population size: {len(ranked_population)}')
     return ranked_costs[0], ranked_population[0]
 
 
