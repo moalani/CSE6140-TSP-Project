@@ -26,13 +26,20 @@ def getData(fileName):
             # reading next line
             line = inputFile.readline()
         # defining a zero array to store the distances from one node to another
-            distanceMap = np.zeros((len(coordinates), len(coordinates)), dtype = int)
-        for i in range(len(coordinates)):
-            for j in range(i + 1, len(coordinates)):
-                # taking distance between each node
-                distanceMap[i, j] =  int(round(math.sqrt((coordinates[i][0] - coordinates[j][0]) ** 2 + (coordinates[i][1] - coordinates[j][1]) ** 2)))
-                distanceMap[j, i] =  distanceMap[i, j]
-    return coordinates, distanceMap
+        distance_map = calculate_distances(coordinates)
+    return coordinates, distance_map
+
+
+def calculate_distances(coordinates):
+    distance_map = np.zeros((len(coordinates), len(coordinates)), dtype=int)
+    for i in range(len(coordinates)):
+        for j in range(i + 1, len(coordinates)):
+            # taking distance between each node
+            distance_map[i, j] = int(round(
+                math.sqrt((coordinates[i][0] - coordinates[j][0]) ** 2 + (coordinates[i][1] - coordinates[j][1]) ** 2)))
+            distance_map[j, i] = distance_map[i, j]
+    return distance_map
+
 
 if __name__ == '__main__':
     main()

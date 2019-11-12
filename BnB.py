@@ -1,19 +1,27 @@
-import numpy as np
 import math
-import time
 import sys
 
+import numpy as np
 
 bestSolution = sys.maxsize / 2
-startingTime = time.time()
-maxTime = 0
 
+def main(coordinates, timer, tracer):
+    distances = calculate_distances(coordinates)
+    return BnB(distances, timer, tracer)
 
-def BnB(distances, timeout):
+def calculate_distances(coordinates):
+    distance_map = np.zeros((len(coordinates), len(coordinates)), dtype=int)
+    for i in range(len(coordinates)):
+        for j in range(i + 1, len(coordinates)):
+            # taking distance between each node
+            distance_map[i, j] = int(round(
+                math.sqrt((coordinates[i][0] - coordinates[j][0]) ** 2 + (coordinates[i][1] - coordinates[j][1]) ** 2)))
+            distance_map[j, i] = distance_map[i, j]
+    return distance_map
 
+def BnB(distances, timer, tracer):
     # modifying the maxtime global variable
-    global maxTime
-    maxTime = timeout
+
     for i in range(distances.shape[0]):
         distances[i, i] = sys.maxsize / 2
     # calling for the lower bound
@@ -24,24 +32,20 @@ def BnB(distances, timeout):
     destinationNodeY = [i for i in range(distances.shape[0])]
     tour = {}
     # calling the BnB main algorithm
-    recursiveSearch(distances, lowerBound, tour, destinationNodeX, destinationNodeY)
+    recursiveSearch(distances, lowerBound, tour, destinationNodeX, destinationNodeY, timer, tracer)
+    return tour
 
-
-def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY):
-
-
+def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, timer, tracer):
     global bestSolution
-    global startingTime
-    global maxTime
 
-    if (time.time() - startingTime > maxTime):
+    if not timer():
         return
 
-    if (lowerBound >= bestSolution):
+    if lowerBound >= bestSolution:
         return
     # print(lowerBound)
     # find new best quality
-    if (distances.shape[0] <= 1):
+    if distances.shape[0] <= 1:
         bestSolution = lowerBound
 
         print(bestSolution)
@@ -56,7 +60,7 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY):
 
     cycleFlag = isCycle(updatedTour, nodeListX[int(xIndex)])
 
-    if cycleFlag == False :  # no MST cycle is False:
+    if cycleFlag == False:  # no MST cycle is False:
         updatedDistances = distances.copy()
         updatedDistances = np.delete(updatedDistances, int(xIndex), axis=0)
         updatedDistances = np.delete(updatedDistances, int(yIndex), axis=1)
@@ -66,7 +70,7 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY):
         del newNodeListX[int(xIndex)]
         newNodeListY = nodeListY[:]
         del newNodeListY[yIndex]
-        recursiveSearch(updatedDistances, updatedLowerBound, updatedTour, newNodeListX, newNodeListY)
+        recursiveSearch(updatedDistances, updatedLowerBound, updatedTour, newNodeListX, newNodeListY, timer, tracer)
 
     distances[int(xIndex), int(yIndex)] = sys.maxsize / 2
 
@@ -81,7 +85,7 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY):
     if temp != 0:
         lowerBound += minDistance
         distances[:, int(yIndex)] -= np.ones(distances.shape[0], dtype=int) * minDistance
-    recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY)
+    recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, timer, tracer)
 
 
 def findLowerBound(distances):
@@ -102,6 +106,7 @@ def findLowerBound(distances):
             distances[:, i] -= np.ones(distances.shape[0], dtype=int) * nextLowestCost
 
     return lowestCost
+
 
 # function to determine if there is cycle in graph
 
