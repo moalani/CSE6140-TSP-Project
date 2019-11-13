@@ -1,3 +1,6 @@
+import datetime as dt
+
+
 def load_data(file_name):
     with open(file_name, 'r') as input_file:
         lines_read = input_file.readlines()
@@ -12,3 +15,10 @@ def load_data(file_name):
         elif 'NAME: ' in text:
             name = text[6:-1]
     return name, data
+
+
+def early_stop_checker(seconds=float('inf'), target_cost=0):
+    start_time = dt.datetime.now()
+    def _lambda(q): 
+        return ((dt.datetime.now() - start_time).total_seconds() < seconds) and q > target_cost
+    return _lambda

@@ -1,3 +1,11 @@
+import datetime as dt
+import os
+
+class NullTracer:
+    def next_result(self, value):
+        pass
+
+
 class Tracer:
     def __init__(self, method, instance, seed, cutoff):
         self.cutoff = cutoff
@@ -9,6 +17,7 @@ class Tracer:
 
     def next_result(self, value):
         if value < self._current_best:
+            self._current_best = value
             self._event_log.append((dt.datetime.now(), value))
 
     def write_to(self, file_path):

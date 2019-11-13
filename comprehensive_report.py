@@ -3,11 +3,7 @@ import genetic_algorithm
 import datetime as dt
 from utilities import load_data
 import json
-
-
-class NullTracer:
-    def next_result(self, value):
-        pass
+from tracer import NullTracer
 
 
 if __name__ == '__main__':

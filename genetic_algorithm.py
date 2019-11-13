@@ -58,7 +58,7 @@ def optimize_tsp(locations, timer, tracer):
     costs = list(map(tour_cost, population))
     ranked_costs, ranked_population = list(zip(*sorted(zip(costs, population), key=lambda x: x[0])))
     time_spent = 0
-    while time_spent <= 100 and timer():
+    while time_spent <= 100 and timer(ranked_costs[0]):
         ranked_population = ranked_population[:population_size // 8]
         ranked_population += tuple(generate_new_population(locations, 3 * population_size // 4))
         best_pairings = list(zip(random.choices(ranked_population[:5], k=population_size // 2),
@@ -100,7 +100,7 @@ def generate_new_population(locations, population_size):
     return population
 
 
-def solve(data: list, timer=lambda: True, tracer=None) -> object:
+def solve(data: list, timer=lambda x: True, tracer=None) -> object:
     tsp_data = data
     location_index_map = {location: i for i, location in enumerate(tsp_data)}
     score, path = optimize_tsp(tsp_data, timer=timer, tracer=tracer)

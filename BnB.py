@@ -38,8 +38,10 @@ def BnB(distances, timer, tracer):
 def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, timer, tracer):
     global bestSolution
 
-    if not timer():
+    if not timer(bestSolution):
         return
+
+    tracer.next_result(bestSolution)
 
     if lowerBound >= bestSolution:
         return

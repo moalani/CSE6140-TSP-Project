@@ -7,7 +7,7 @@ import numpy as np
 import BnB
 import genetic_algorithm
 from tracer import Tracer
-from utilities import load_data
+from utilities import load_data, early_stop_checker
 
 
 def save_solution_file(cost_value, solution, method, instance, seed, cutoff):
@@ -42,18 +42,15 @@ if __name__ == '__main__':
     instance_name, city_data = load_data(args.inst)
     tracer = Tracer(method=args.alg, instance=instance_name, seed=args.seed, cutoff=args.time)
 
-
-    def timer():
-        return (dt.datetime.now() - start_time).total_seconds() < args.time
-
+    score, solution = None, None
 
     if args.alg == 'LS1':
         score, solution = genetic_algorithm.solve(data=city_data,
-                                                  timer=timer,
+                                                  timer=early_stop_checker(seconds=args.time),
                                                   tracer=tracer)
     elif args.alg == 'BnB':
         score = float('inf')
-        solution = BnB.main(city_data, timer, tracer)
+        solution = BnB.main(city_data, early_stop_checker(seconds=args.time), tracer)
         print(solution)
 
     save_solution_file(score, solution, method=args.alg, instance=instance_name, seed=args.seed, cutoff=args.time)
