@@ -1,9 +1,30 @@
 import datetime as dt
 import os
 
+
 class NullTracer:
     def next_result(self, value):
         pass
+
+
+class MultiRunTracer:
+    def __init__(self):
+        self._runs = []
+        self._reset()
+
+    def _reset(self):
+        self._event_log = []
+        self._current_best = float('inf')
+
+
+    def next_result(self, value):
+        if value < self._current_best:
+            self._current_best = value
+            self._event_log.append((dt.datetime.now(), value))
+
+    def next_run(self):
+        self._runs.append(self._event_log)
+        self._reset()
 
 
 class Tracer:
