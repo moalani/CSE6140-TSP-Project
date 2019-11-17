@@ -1,45 +1,63 @@
+import argparse
+import datetime as dt
+import random
 import numpy as np
-import math
 
-def main():
+# Custom utilities
+from tracer import Tracer
+from utilities import load_data, early_stop_checker
 
-    # testing Atlanta
-    atlCoordinates, atlDisances = getData("Atlanta.tsp")
+# Optimization
+import BnB
+import genetic_algorithm
 
-    print(atlCoordinates)
-    print (atlDisances)
-
-
-
-def getData(fileName):
-
-    # reading file
-    with open(fileName, 'r') as inputFile:
-        coordinates = []
-        # Skipping the first five lines by reading them. This is because the data starts from the 6th line
-        for i in range(6):
-            line = inputFile.readline()
-        # Reading the remaining file, and reading the coordinates of each city
-        while (line != 'EOF\n'):
-            # saving the coordinates in a tuple
-            coordinates.append((int(float(line.split(' ')[1])), int(float(line.split(' ')[2]))))
-            # reading next line
-            line = inputFile.readline()
-        # defining a zero array to store the distances from one node to another
-        distance_map = calculate_distances(coordinates)
-    return coordinates, distance_map
-
-
-def calculate_distances(coordinates):
-    distance_map = np.zeros((len(coordinates), len(coordinates)), dtype=int)
-    for i in range(len(coordinates)):
-        for j in range(i + 1, len(coordinates)):
-            # taking distance between each node
-            distance_map[i, j] = int(round(
-                math.sqrt((coordinates[i][0] - coordinates[j][0]) ** 2 + (coordinates[i][1] - coordinates[j][1]) ** 2)))
-            distance_map[j, i] = distance_map[i, j]
-    return distance_map
+def save_solution_file(cost_value, solution, method, instance, seed, cutoff):
+    with open(f'{instance}_{method}_{cutoff}_{seed}.sol', 'w') as solution_file:
+        solution_file.write(str(cost_value) + '\n')
+        solution_file.write(str(solution)[1:-1] + '\n')
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Run TSP on a given location file.')
+    parser.add_argument('-inst',
+                        type=str,
+                        help='The full file path to the TSP data to solve.')
+    parser.add_argument('-alg',
+                        type=str,
+                        help='The TSP algorithm to use. Currently supports LS1 only')
+    parser.add_argument('-time',
+                        type=int,
+                        help='Time limit for TSP to solve in.')
+    parser.add_argument('-seed',
+                        type=int,
+                        default=np.random.randint(999999),
+                        help='Random seed for solver to use to ensure repeatable results.')
+    args = parser.parse_args()
+
+    print(
+        f'''Running algorithm {args.alg} on file {args.inst} with a time limit of {args.time} seconds and a random seed of {args.seed}''')
+
+    np.random.seed(args.seed)
+    random.seed(np.random.randint(999999))
+    start_time = dt.datetime.now()
+    instance_name, city_data = load_data(args.inst)
+    tracer = Tracer(method=args.alg, instance=instance_name, seed=args.seed, cutoff=args.time)
+
+    score, solution = None, None
+
+    if args.alg == 'LS1':
+        score, solution = genetic_algorithm.solve(data=city_data,
+                                                  timer=early_stop_checker(seconds=args.time),
+                                                  tracer=tracer)
+    elif args.alg == 'BnB':
+        score, solution = BnB.solve(data=city_data,
+                                    timer=early_stop_checker(seconds=args.time),
+                                    tracer=tracer)
+
+    save_solution_file(score,
+                       solution,
+                       method=args.alg,
+                       instance=instance_name,
+                       seed=args.seed,
+                       cutoff=args.time)
+    tracer.write_to('./')
