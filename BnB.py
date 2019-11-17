@@ -1,20 +1,15 @@
 import math
 import sys
-import time
 import numpy as np
 
-startTime = time.time()
+
 bestSolution = sys.maxsize / 2
-tracer = []
 allTour = []
 
 
-def main():
-    coords, distances = getData("Atlanta.tsp")
-    # print(distances)
-    print(BnB(distances, 600))
-
-    # return BnB(distances, timer, tracer)
+def solve(data, timer, tracer):
+    distances = calculate_distances(data)
+    return BnB(distances, timer, tracer)
 
 
 def calculate_distances(coordinates):
@@ -28,7 +23,7 @@ def calculate_distances(coordinates):
     return distance_map
 
 
-def BnB(distances, timer):  # , timer, tracer):
+def BnB(distances, early_stop_checker, tracer):
     global tt
     # modifying the maxtime global variable
 
@@ -42,7 +37,7 @@ def BnB(distances, timer):  # , timer, tracer):
     destinationNodeY = [i for i in range(distances.shape[0])]
     tour = {}
     # calling the BnB main algorithm
-    bestCost, t, tour = recursiveSearch(distances, lowerBound, tour, destinationNodeX, destinationNodeY, timer)
+    bestCost, tour = recursiveSearch(distances, lowerBound, tour, destinationNodeX, destinationNodeY, early_stop_checker, tracer)
 
     allNodes = [i for i in range(distances.shape[0])]
     keyList = allTour.keys()
@@ -60,16 +55,15 @@ def BnB(distances, timer):  # , timer, tracer):
         bestTour.append(temp)
     # print(bestTour)
 
-    return bestCost, bestTour, tracer
+    return bestCost, bestTour
 
 
-def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, timer):
+def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, early_stop_checker, tracer):
     global bestSolution
-    global startTime
-    global tracer
     global allTour
 
-    if ((time.time() - startTime) > timer):
+
+    if not early_stop_checker(bestSolution):
         return
 
     if lowerBound >= bestSolution:
@@ -78,7 +72,7 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, timer):
     if distances.shape[0] <= 1:
         bestSolution = lowerBound
         allTour = tour.copy()
-        tracer.append((bestSolution, time.time() - startTime))
+        tracer.next_result(bestSolution)
         return
 
     minDistance = np.argmin(distances)
@@ -100,7 +94,7 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, timer):
         del newNodeListX[int(xIndex)]
         newNodeListY = nodeListY[:]
         del newNodeListY[yIndex]
-        recursiveSearch(updatedDistances, updatedLowerBound, updatedTour, newNodeListX, newNodeListY, timer)
+        recursiveSearch(updatedDistances, updatedLowerBound, updatedTour, newNodeListX, newNodeListY, early_stop_checker, tracer)
 
     distances[int(xIndex), int(yIndex)] = sys.maxsize / 2
 
@@ -115,9 +109,9 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, timer):
     if temp != 0:
         lowerBound += minDistance
         distances[:, int(yIndex)] -= np.ones(distances.shape[0], dtype=int) * minDistance
-    recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, timer)
+    recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, early_stop_checker, tracer)
 
-    return bestSolution, tracer, tour
+    return bestSolution, tour
 
 
 def findLowerBound(distances):
@@ -174,9 +168,6 @@ def getData(fileName):
                 distanceMap[j, i] = distanceMap[i, j]
     return coordinates, distanceMap
 
-
-if __name__ == '__main__':
-    main()
 
 '''import math
 import sys

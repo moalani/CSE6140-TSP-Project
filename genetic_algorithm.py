@@ -1,4 +1,3 @@
-import datetime as dt
 import random
 import numpy as np
 
@@ -105,18 +104,3 @@ def solve(data: list, timer=lambda x: True, tracer=None) -> object:
     location_index_map = {location: i for i, location in enumerate(tsp_data)}
     score, path = optimize_tsp(tsp_data, timer=timer, tracer=tracer)
     return score, [location_index_map[location] for location in path]
-
-
-if __name__ == '__main__':
-    start_time = dt.datetime.now()
-
-
-    def timer():
-        return (dt.datetime.now() - start_time).total_seconds() < args.time
-
-
-    score, solution = solve(
-        file_path='''/Users/justin/SynologyDrive/Learning Materials/School/Grad School/CSE 6140 Algorithms/Project/CSE6140-TSP-Project/DATA/Berlin.tsp''',
-        timer=timer,
-        seed=0)
-    print(score, solution)
