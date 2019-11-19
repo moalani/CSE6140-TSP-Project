@@ -2,6 +2,7 @@ import argparse
 import datetime as dt
 import random
 import numpy as np
+import sys
 
 # Custom utilities
 from tracer import Tracer
@@ -27,6 +28,7 @@ if __name__ == '__main__':
                         help='The TSP algorithm to use. Currently supports LS1 only')
     parser.add_argument('-time',
                         type=int,
+                        default=sys.maxsize,
                         help='Time limit for TSP to solve in.')
     parser.add_argument('-seed',
                         type=int,
