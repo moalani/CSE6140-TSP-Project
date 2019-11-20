@@ -87,7 +87,7 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, early_sto
         updatedDistances = np.delete(updatedDistances, int(xIndex), axis=0)
         updatedDistances = np.delete(updatedDistances, int(yIndex), axis=1)
         minDistance = findLowerBound(updatedDistances)
-        updatedLowerBound = lowerBound + minValue + minDistance
+        updatedLowerBound = int(lowerBound) + int(minValue) + int(minDistance)
         newNodeListX = nodeListX[:]
         del newNodeListX[int(xIndex)]
         newNodeListY = nodeListY[:]
@@ -99,13 +99,13 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, early_sto
     minDistance = min(distances[int(xIndex), :])
 
     if minDistance != 0:
-        lowerBound += minDistance
+        lowerBound = int(lowerBound) +  int(minDistance)
         distances[int(xIndex), :] -= np.ones(distances.shape[0], dtype=int) * minDistance
 
     temp = min(distances[:, int(yIndex)])
 
     if temp != 0:
-        lowerBound += minDistance
+        lowerBound = int(lowerBound)+ int(minDistance)
         distances[:, int(yIndex)] -= np.ones(distances.shape[0], dtype=int) * minDistance
     recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, early_stop_checker, tracer)
 
@@ -119,7 +119,7 @@ def findLowerBound(distances):
 
         nextLowestCost = min(distances[i, :])
         if nextLowestCost != 0:
-            lowestCost += nextLowestCost
+            lowestCost = int(nextLowestCost)  + int(lowestCost)
             distances[i, :] -= np.ones(distances.shape[0], dtype=int) * nextLowestCost
 
     for i in range(distances.shape[0]):
