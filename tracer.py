@@ -48,4 +48,4 @@ class Tracer:
         with open(full_path, 'w') as f:
             for time, value in self._event_log:
                 seconds_elapsed = round((time - first_time).total_seconds(), 2)
-                f.write(f'{seconds_elapsed}, {value}\n')
+                f.write(f'{seconds_elapsed},{value}\n')

@@ -3,7 +3,7 @@ from utilities import distance, tour_cost
 
 
 def optimize(tsp_data, timer, tracer=NullTracer()):
-    return run_two_opt(timer, tracer, tsp_data)
+    return run_two_opt(tsp_data, timer, tracer)
 
 
 def run_two_opt(tsp_data, timer, tracer):
