@@ -9,8 +9,8 @@ from tracer import Tracer
 from utilities import load_data, early_stop_checker
 
 # Optimization
-import BnB
-import genetic_algorithm
+from Algorithms import genetic_algorithm, BnB, two_opt, genetic_algorithm_opt_2_hybrid
+
 
 def save_solution_file(cost_value, solution, method, instance, seed, cutoff):
     with open(f'{instance}_{method}_{cutoff}_{seed}.sol', 'w') as solution_file:
@@ -55,6 +55,14 @@ if __name__ == '__main__':
         score, solution = BnB.solve(data=city_data,
                                     timer=early_stop_checker(seconds=args.time),
                                     tracer=tracer)
+    elif args.alg == 'LS2':
+        score, solution = two_opt.solve(data=city_data,
+                                        timer=early_stop_checker(seconds=args.time),
+                                        tracer=tracer)
+    elif args.alg == 'LS3':
+        score, solution = genetic_algorithm_opt_2_hybrid.solve(data=city_data,
+                                        timer=early_stop_checker(seconds=args.time),
+                                        tracer=tracer)
 
     save_solution_file(score,
                        solution,

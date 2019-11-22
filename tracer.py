@@ -39,6 +39,7 @@ class Tracer:
     def next_result(self, value):
         if value < self._current_best:
             self._current_best = value
+            print(value)
             self._event_log.append((dt.datetime.now(), value))
 
     def write_to(self, file_path):

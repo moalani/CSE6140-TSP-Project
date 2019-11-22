@@ -1,27 +1,23 @@
 import random
 import numpy as np
 
-
-def distance(node_a: list, node_b: list) -> float:
-    return np.sqrt((node_a[0] - node_b[0]) ** 2 + (node_a[1] - node_b[1]) ** 2)
-
-
-def tour_cost(path: list) -> float:
-    cost = 0
-    for previous_index, current_node in enumerate(path[1:]):
-        previous_node = path[previous_index]
-        cost += distance(previous_node, current_node)
-    cost += distance(path[0], path[-1])
-    return cost
+from tracer import NullTracer
+from utilities import tour_cost
+import Algorithms.two_opt as ato
 
 
 def breed_to_right(left, right_input):
     right = list(right_input)
     start_index = np.random.randint(len(left))
-    selection_length = np.random.randint(1, len(left))
-    actual_selection_length = min(len(left) - start_index, selection_length)
-    end_index = start_index + actual_selection_length - 1
-    left_chromosome = left[start_index: end_index + 1]
+    # This section should choose randomly from the feasible sequence
+    # This was initially meant to allow for circular reference but that
+    # hasn't happened yet.
+    # actual_selection_length = (len(foo)-1) - start_index
+    # Replace next two lines with this ^^
+    #selection_length = np.random.randint(1, len(left))
+    #actual_selection_length = min(len(left) - start_index, selection_length)
+    actual_selection_length = (len(left) - 1) - start_index
+    left_chromosome = left[start_index: start_index + actual_selection_length]
     right_insertion_index = np.random.randint(0, len(right) - actual_selection_length)
     for index, left_insertion in enumerate(left_chromosome):
         right_removed = right[right_insertion_index: right_insertion_index + actual_selection_length]
@@ -50,30 +46,44 @@ def mutate(offspring):
 
 def optimize_tsp(locations, timer, tracer):
     current_low = float('inf')
-    epochs = 0
 
-    population_size = 600
+    population_size = 200
+    print("Running two_opt initially")
+    initial_solve = ato.run_two_opt(locations, timer=timer, tracer=NullTracer())[1]
+    print("Done running two_opt initially")
     population = generate_new_population(locations, population_size)
+    population.append(initial_solve)
     costs = list(map(tour_cost, population))
     ranked_costs, ranked_population = list(zip(*sorted(zip(costs, population), key=lambda x: x[0])))
     time_spent = 0
     while time_spent <= 100 and timer(ranked_costs[0]):
         ranked_population = ranked_population[:population_size // 8]
-        ranked_population += tuple(generate_new_population(locations, 3 * population_size // 4))
-        best_pairings = list(zip(random.choices(ranked_population[:5], k=population_size // 2),
-                                 random.choices(ranked_population[:100], k=population_size // 2)))
-        random_pairings = list(zip(random.choices(ranked_population[:100], k=population_size // 2),
-                                   random.choices(ranked_population[100:], k=population_size // 2)))
+        ranked_population += tuple(generate_new_population(locations, 4 * population_size // 8))
+        best_pairings = list(zip(random.choices(ranked_population[:5], k=population_size // 4),
+                                 random.choices(ranked_population[:100], k=population_size // 4)))
+        random_pairings = list(zip(random.choices(ranked_population[:100], k=population_size // 4),
+                                   random.choices(ranked_population[100:], k=population_size // 4)))
 
         pairings = best_pairings + random_pairings
 
         offspring = []
-        offspring += ranked_population[:10]  # save top N just like they are
         offspring += list(
             map(lambda x: breed_to_right(x[0], x[1]) if np.random.random() > 0.5 else breed_to_right(x[1], x[0]),
                 pairings))
 
         offspring = list(map(mutate, offspring))
+        offspring += ranked_population[1:10]  # save top N just like they are
+
+        if time_spent % 20 == 0:
+            print(f'Running Two-Opt {time_spent}')
+            counter = 0
+            def two_opt_timer(x):
+                nonlocal counter
+                counter += 1
+                return counter % 1000 == 0
+            offspring = list(map(lambda x: ato.run_two_opt(x, timer=two_opt_timer, tracer=tracer)[1], offspring))
+            print('Done running Two-Opt')
+            #print(offspring)
 
         costs = list(map(tour_cost, list(offspring)))
         rankings = list(zip(*sorted(zip(costs, offspring), key=lambda x: x[0])))
@@ -86,10 +96,8 @@ def optimize_tsp(locations, timer, tracer):
             time_spent = 0
         elif ranked_costs[0] == current_low:
             time_spent += 1
-        epochs += 1
 
         tracer.next_result(ranked_costs[0])
-        #print(f'Lowest cost: {ranked_costs[0]}, Population size: {len(ranked_population)}')
     return ranked_costs[0], ranked_population[0]
 
 

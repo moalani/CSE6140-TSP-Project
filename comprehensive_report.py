@@ -1,6 +1,5 @@
 import glob
-import genetic_algorithm
-import BnB
+from Algorithms import BnB
 import datetime as dt
 import utilities
 import json
@@ -17,8 +16,8 @@ if __name__ == '__main__':
             instance_name, city_data = utilities.load_data(city_file)
             start_time = dt.datetime.now()
             score, solution = BnB.solve(data=city_data,
-                                                      timer=utilities.early_stop_checker(600),
-                                                      tracer=NullTracer())
+                                        timer=utilities.early_stop_checker(600),
+                                        tracer=NullTracer())
             end_time = dt.datetime.now()
             instance_results = results.get(instance_name, {'costs': [], 'times': []})
             instance_results['costs'].append(int(score))
