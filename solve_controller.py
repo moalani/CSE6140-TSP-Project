@@ -9,9 +9,10 @@ from utilities import load_data, early_stop_checker
 
 
 def save_solution_file(cost_value, solution, method, instance, seed, cutoff):
-    with open(f'output/{instance}_{method}_{cutoff}_{seed}.sol', 'w') as solution_file:
-        solution_file.write(str(cost_value) + '\n')
-        solution_file.write(str(solution)[1:-1] + '\n')
+    file_name = f'output/{instance}_{method}_{cutoff}_{seed}.sol' if method != 'BnB' else f'output/{instance}_{method}_{cutoff}.sol'
+    with open(file_name, 'w') as solution_file:
+        solution_file.write(str(int(cost_value)) + '\n')
+        solution_file.write(','.join(map(str, solution)) + '\n')
 
 
 def solve_with_options(algorithm_to_run,

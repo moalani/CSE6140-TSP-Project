@@ -39,13 +39,13 @@ class Tracer:
     def next_result(self, value):
         if value < self._current_best:
             self._current_best = value
-            print(value)
             self._event_log.append((dt.datetime.now(), value))
 
     def write_to(self, file_path):
         first_time = self._event_log[0][0]
-        full_path = os.path.join(file_path, f'{self.instance}_{self.method}_{self.cutoff}_{self.seed}.trace')
+        file_name = f'{self.instance}_{self.method}_{self.cutoff}_{self.seed}.trace' if self.method != 'BnB' else f'{self.instance}_{self.method}_{self.cutoff}.trace'
+        full_path = os.path.join(file_path, file_name)
         with open(full_path, 'w') as f:
             for time, value in self._event_log:
                 seconds_elapsed = round((time - first_time).total_seconds(), 2)
-                f.write(f'{seconds_elapsed},{value}\n')
+                f.write(f'{seconds_elapsed},{int(value)}\n')
