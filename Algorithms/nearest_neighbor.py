@@ -1,6 +1,4 @@
-
 import random
-
 import utilities
 from tracer import Tracer
 

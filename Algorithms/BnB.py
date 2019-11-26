@@ -22,9 +22,6 @@ def calculate_distances(coordinates):
 
 
 def BnB(distances, early_stop_checker, tracer):
-    global tt
-    # modifying the maxtime global variable
-
     for i in range(distances.shape[0]):
         distances[i, i] = sys.maxsize / 2
     # calling for the lower bound
