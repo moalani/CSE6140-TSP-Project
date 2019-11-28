@@ -5,6 +5,8 @@ from utilities import distance, tour_cost
 def optimize(tsp_data, timer, tracer=NullTracer()):
     return run_two_opt(tsp_data, timer, tracer)
 
+def two_opt_swap(sequence, i, k):
+    return sequence[:i] + sequence[i:k+1][::-1] + sequence[k+1:]
 
 def run_two_opt(tsp_data, timer, tracer):
     original_cost = tour_cost(tsp_data)
@@ -12,31 +14,24 @@ def run_two_opt(tsp_data, timer, tracer):
     sequence = list(tsp_data)
     # For each edge-pair evaluate if there is a cross-over
     # For each city compare against every non-neighboring city
-    for i, A in enumerate(sequence):
-        for k, B in enumerate(sequence[:i - 1]):
-            sequence[i], sequence[k] = sequence[k], sequence[i]
-            updated_cost = tour_cost(sequence)
-            if updated_cost < original_cost:
-                original_cost = updated_cost
-            else:
-                sequence[i], sequence[k] = sequence[k], sequence[i]
-            tracer.next_result(updated_cost)
-            if not timer(updated_cost):
+    while True:
+        new_sequence_found = False
+        for i in range(0, len(sequence)-1):
+            for k in range(i+1, len(sequence)):
+                if not timer(updated_cost):
+                    return updated_cost, sequence
+                new_route = two_opt_swap(sequence, i, k)
+                new_cost = tour_cost(new_route)
+                tracer.next_result(new_cost)
+                if new_cost < updated_cost:
+                    sequence = new_route
+                    new_sequence_found = True
+                    updated_cost = new_cost
+                    break
+            if new_sequence_found:
                 break
-        for k_, B in enumerate(sequence[i + 2:]):
-            k = k_ + i + 2
-            sequence[i], sequence[k] = sequence[k], sequence[i]
-            updated_cost = tour_cost(sequence)
-            if updated_cost < original_cost:
-                original_cost = updated_cost
-            else:
-                sequence[i], sequence[k] = sequence[k], sequence[i]
-            tracer.next_result(updated_cost)
-            if not timer(updated_cost):
-                break
-        if not timer(updated_cost):
-            break
-    return updated_cost, sequence
+        if not new_sequence_found:
+            return updated_cost, sequence
 
 
 def solve(data: list, timer=lambda x: True, tracer=None) -> object:
