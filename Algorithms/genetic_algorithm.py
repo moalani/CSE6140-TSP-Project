@@ -10,10 +10,6 @@ def breed_to_right(left, right_input):
     # This section should choose randomly from the feasible sequence
     # This was initially meant to allow for circular reference but that
     # hasn't happened yet.
-    # actual_selection_length = (len(foo)-1) - start_index
-    # Replace next two lines with this ^^
-    #selection_length = np.random.randint(1, len(left))
-    #actual_selection_length = min(len(left) - start_index, selection_length)
     actual_selection_length = (len(left) - 1) - start_index
     left_chromosome = left[start_index: start_index + actual_selection_length]
     right_insertion_index = np.random.randint(0, len(right) - actual_selection_length)
