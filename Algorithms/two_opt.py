@@ -1,3 +1,5 @@
+import random
+
 from tracer import NullTracer
 from utilities import distance, tour_cost
 
@@ -13,8 +15,7 @@ def two_opt_swap(sequence, i, k):
 def run_two_opt(tsp_data, timer, tracer):
     updated_cost = tour_cost(tsp_data)
     sequence = list(tsp_data)
-    # For each edge-pair evaluate if there is a cross-over
-    # For each city compare against every non-neighboring city
+    # Keep searching for 2-opt swaps until there are no further improvements.
     while True:
         iteration_cost = updated_cost
         for i in range(0, len(sequence)-1):
@@ -33,6 +34,7 @@ def run_two_opt(tsp_data, timer, tracer):
 
 
 def solve(data: list, timer=lambda x: True, tracer=None) -> object:
+    random.shuffle(data)
     location_index_map = {location: i for i, location in enumerate(data)}
     score, path = optimize(data, timer=timer, tracer=tracer)
     return score, [location_index_map[location] for location in path]

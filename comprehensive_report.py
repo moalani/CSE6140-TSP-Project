@@ -1,5 +1,5 @@
 import glob
-from Algorithms import BnB, nearest_neighbor, two_opt
+from Algorithms import BnB, nearest_neighbor, two_opt, nearest_neighbor
 import datetime as dt
 import utilities
 import json
@@ -15,7 +15,7 @@ if __name__ == '__main__':
             print(i)
             instance_name, city_data = utilities.load_data(city_file)
             start_time = dt.datetime.now()
-            score, solution = two_opt.solve(data=city_data,
+            score, solution = nearest_neighbor.solve(data=city_data,
                                         timer=utilities.early_stop_checker(600),
                                         tracer=NullTracer())
             end_time = dt.datetime.now()
@@ -23,4 +23,4 @@ if __name__ == '__main__':
             instance_results['costs'].append(int(score))
             instance_results['times'].append((end_time - start_time).total_seconds())
             results[instance_name] = instance_results
-    json.dump(obj=results, fp=open('comprehensive_report_2opt.json', 'w'))
+    json.dump(obj=results, fp=open('comprehensive_report_approx.json', 'w'))
