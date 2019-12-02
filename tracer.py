@@ -1,6 +1,7 @@
 import datetime as dt
 import os
 
+# These different implementations of tracers are useful to examine the algorithms in different contexts.
 
 class NullTracer:
     def next_result(self, value):

@@ -1,5 +1,4 @@
 import random
-
 import numpy as np
 
 from Algorithms import genetic_algorithm, BnB, two_opt, genetic_algorithm_opt_2_hybrid, nearest_neighbor

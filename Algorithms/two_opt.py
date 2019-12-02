@@ -1,13 +1,13 @@
 import random
-
 from tracer import NullTracer
-from utilities import distance, tour_cost
+from utilities import tour_cost
 
 
 def optimize(tsp_data, timer, tracer=NullTracer()):
     return run_two_opt(tsp_data, timer, tracer)
 
 
+# This function only exists to make the two opt swap operation obvious
 def two_opt_swap(sequence, i, k):
     return sequence[:i] + sequence[i:k+1][::-1] + sequence[k+1:]
 

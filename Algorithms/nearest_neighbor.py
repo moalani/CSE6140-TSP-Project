@@ -24,6 +24,9 @@ def optimize(data, timer, tracer:Tracer):
     final_cost = utilities.tour_cost(greedy_path)
     return final_cost, greedy_path
 
+
+# This follows our standard solve interface.
+# This enables all algorithms to work with the same reporting code with no changes.
 def solve(data: list, timer=lambda x: True, tracer=None) -> object:
     location_index_map = {location: i for i, location in enumerate(data)}
     score, path = optimize(data, timer=timer, tracer=tracer)

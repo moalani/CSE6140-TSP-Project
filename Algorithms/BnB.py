@@ -2,6 +2,7 @@ import math
 import sys
 import numpy as np
 
+
 def solve(data, timer, tracer):
     global bestSolution, allTour
     bestSolution = sys.maxsize / 2
@@ -130,7 +131,6 @@ def findLowerBound(distances):
 
 
 # function to determine if there is cycle in graph
-
 def isCycle(tour, location):
     temp = location
     while temp != None:

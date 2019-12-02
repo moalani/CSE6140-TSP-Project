@@ -46,7 +46,11 @@ def optimize_tsp(locations, timer, tracer):
     costs = list(map(tour_cost, population))
     ranked_costs, ranked_population = list(zip(*sorted(zip(costs, population), key=lambda x: x[0])))
     time_spent = 0
+
+    # Our timer is also capable of stopping the algorithm once the quality is close enough to some target.
+    # So we feed the current cost of the best solution to it.
     while time_spent <= 100 and timer(ranked_costs[0]):
+        # Gather all the individuals to "breed" with each other.
         ranked_population = ranked_population[:population_size // 8]
         ranked_population += tuple(generate_new_population(locations, 3 * population_size // 4))
         best_pairings = list(zip(random.choices(ranked_population[:5], k=population_size // 2),
@@ -62,14 +66,19 @@ def optimize_tsp(locations, timer, tracer):
             map(lambda x: breed_to_right(x[0], x[1]) if np.random.random() > 0.5 else breed_to_right(x[1], x[0]),
                 pairings))
 
+        # After applying the cross-over operation randomly mutate the resulting solutions.
         offspring = list(map(mutate, offspring))
 
+        # Rank solutions by their cost
         costs = list(map(tour_cost, list(offspring)))
         rankings = list(zip(*sorted(zip(costs, offspring), key=lambda x: x[0])))
 
         # Maintain a constant population
         ranked_costs, ranked_population = rankings[:population_size]
 
+        # Helps determine when the genetic algorithm should stop.
+        # Here we use a certain number of iterations without improvements
+        # as stopping criteria.
         if ranked_costs[0] < current_low:
             current_low = ranked_costs[0]
             time_spent = 0

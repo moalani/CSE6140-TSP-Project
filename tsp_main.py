@@ -20,13 +20,15 @@ if __name__ == '__main__':
                         type=int,
                         default=sys.maxsize,
                         help='Time limit for TSP to solve in.')
+    # By default all algorithm runs will run with a seed that will be added to the solution and trace file names
+    # though if not specified, it is a random seed.
     parser.add_argument('-seed',
                         type=int,
                         default=np.random.randint(999999),
                         help='Random seed for solver to use to ensure repeatable results.')
     args = parser.parse_args()
 
-    solve_with_options(algorithm_to_run = args.alg,
+    solve_with_options(algorithm_to_run=args.alg,
                        seed=args.seed,
-                       run_time = args.time,
-                       inst = args.inst)
+                       run_time=args.time,
+                       inst=args.inst)
