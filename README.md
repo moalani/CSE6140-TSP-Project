@@ -1,24 +1,32 @@
 # CSE6140-TSP-Project
 
+# For Those Who Want to Run the Code
+
+## Dependencies
+Please run `pip install -r requirements.txt` in the root folder to install the couple of necessary libraries.
+
+## Running the main code
+The various algorithms can be ran by running the following command from the project root:
+python tsp_main.py -inst [PROJECT ROOT PATH]/DATA/NYC.tsp -alg BnB -time 10
+
+Where "[PROJECT ROOT PATH]" is the path to the root of the project (the path to the inside of the project folder) on your computer.
+
+-alg specifies the algorithm to use. Currently BnB and LS1 are implemented. LS1 is a genetic algorithm.
+
+-time specifies a run time in seconds. If it is not specified it will default to sys.maxsize which is really really long and you'll never hit the limit.
+
+You can also specify -seed and provide a seed for the random number generators. If you do not provide a seed, a random see will be specified and used. You will find this on the solution and trace files that are created. The seed will only not be shown to you in the case of Branch and Bound (using the `-alg BnB` parameter setting).
+
+The output folder is assumed to exist already and it's assumed that it's in the directory the code is ran from since there is no specification for setting a root directory via a parameter.
+
+# For Contributors 
+
 Project Report Folder
 https://drive.google.com/drive/folders/1C3KlKVYS37SJlamtDxwUDJeaTvf16mvx
 
 Comprehensive Report Results
 https://docs.google.com/spreadsheets/d/1s1JZGs5PHlm51C7ku-QRZw8UeWOzn6Ny4yUw4hdiBkM/edit?usp=sharing
 
-
-# Summary of how to run the code
-
-The various algorithms can be ran by running the following command from the project root:
-python main.py -inst [PROJECT ROOT PATH]/DATA/NYC.tsp -alg BnB -time 10
-
-Where "[PROJECT ROOT PATH]" is the path to the root of the project (the path to the inside of the project folder) on your computer.
-
--alg specifies the algorithm to use. Currently BnB and LS1 are implemented. LS1 is a genetic algorithm.
-
--time specifies a run time in seconds. If it is not specified it will default to sys.maxsize which is really really long and you'll never hit the limit.1C3KlKVYS37SJlamtDxwUDJeaTvf16mvx
-
-You can also specify -seed and provide a seed for the random number generators. If you do not provide a seed, a random see will be specified and used. You will find this on the solution and trace files that are created.
 
 
 # How to Add an Algorithm
