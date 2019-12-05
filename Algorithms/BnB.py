@@ -53,15 +53,16 @@ def BnB(distances, early_stop_checker, tracer):
 
     return bestCost, bestTour
 
-
+# basic function to go through the distances nodes and uses the lower bound. The function is recursive until reaching
+# the base case where lower bound is greater than best solution.
 def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, early_stop_checker, tracer):
     global bestSolution
     global allTour
 
-
+# time out flags
     if not early_stop_checker(bestSolution):
         return
-
+# base case
     if lowerBound >= bestSolution:
         return
 
@@ -77,7 +78,7 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, early_sto
     minValue = np.amin(distances)
     updatedTour = tour.copy()
     updatedTour[nodeListX[int(xIndex)]] = nodeListY[int(yIndex)]
-
+# determine if there is cycle
     cycleFlag = isCycle(updatedTour, nodeListX[int(xIndex)])
 
     if cycleFlag == False:  # no MST cycle is False:
@@ -109,7 +110,7 @@ def recursiveSearch(distances, lowerBound, tour, nodeListX, nodeListY, early_sto
 
     return bestSolution, tour
 
-
+# this function determines the lower bound, using the bounded MST approach
 def findLowerBound(distances):
     lowestCost = 0
 
