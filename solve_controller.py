@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import os
 
 from Algorithms import genetic_algorithm, BnB, two_opt, genetic_algorithm_opt_2_hybrid, nearest_neighbor
 from tracer import Tracer
@@ -44,6 +45,10 @@ def solve_with_options(algorithm_to_run,
         score, solution = nearest_neighbor.solve(data=city_data,
                                                  timer=early_stop_checker(seconds=run_time),
                                                  tracer=tracer)
+
+    if not os.path.exists('output'):
+        os.makedirs('output')
+
     save_solution_file(score,
                        solution,
                        method=algorithm_to_run,
